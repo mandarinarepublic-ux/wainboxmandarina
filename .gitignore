@@ -1,4 +1,16 @@
-.vercel
+# Dependencias
+node_modules/
+
+# Build
+dist/
+
+# Variables de entorno (contienen claves API)
+.env.local
 .env*.local
-node_modules
-dist
+
+# Vercel
+.vercel/
+
+# Sistema
+.DS_Store
+Thumbs.db
