@@ -227,10 +227,10 @@ export default function RightPanel({ activeConv, onQuickReply, onSendText, onSen
             ) : (
               <div style={{ display:'flex', alignItems:'center', gap:4 }}>
                 <span style={{ fontWeight:700, color:'#f1f5f9', fontSize:13, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{contactName}</span>
-                <button onClick={()=>{ setAliasInput(contactInfo?.alias||''); setEditAlias(true) }} style={{ background:'transparent', border:'none', color:'#334155', cursor:'pointer', fontSize:10, padding:0, flexShrink:0 }}>✏️</button>
+                <button onClick={()=>{ setAliasInput(contactInfo?.alias||''); setEditAlias(true) }} style={{ background:'transparent', border:'none', color:'#94a3b8', cursor:'pointer', fontSize:10, padding:0, flexShrink:0 }}>✏️</button>
               </div>
             )}
-            <div style={{ fontSize:10, color:'#334155', marginTop:1 }}>+{activeConv.telefono}</div>
+            <div style={{ fontSize:10, color:'#94a3b8', marginTop:1 }}>+{activeConv.telefono}</div>
           </div>
         </div>
         <div style={{ marginTop:7, padding:'5px 10px', background:windowOpen?'rgba(37,211,102,.06)':'rgba(245,158,11,.06)', border:`1px solid ${windowOpen?'rgba(37,211,102,.2)':'rgba(245,158,11,.2)'}`, borderRadius:7, fontSize:11, color:windowOpen?'#25d366':'#f59e0b', fontWeight:700, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
@@ -241,7 +241,7 @@ export default function RightPanel({ activeConv, onQuickReply, onSendText, onSen
             </span>
           )}
           {!windowOpen && (
-            <span style={{ fontFamily:'monospace', fontSize:11, color:'#64748b' }}>Expirada</span>
+            <span style={{ fontFamily:'monospace', fontSize:11, color:'#94a3b8' }}>Expirada</span>
           )}
         </div>
 
@@ -329,11 +329,11 @@ export default function RightPanel({ activeConv, onQuickReply, onSendText, onSen
                 borderRadius:7, fontSize:11, fontWeight:700,
                 cursor:aiSent||aiSending?'default':'pointer', fontFamily:'inherit',
               }}>{aiSent?'✓ Enviado':aiSending?'⏳...':'📤 Enviar texto'}</button>
-              <button onClick={() => onSendText && onSendText(null, aiText)} style={{ flex:1, padding:'6px', background:'rgba(255,255,255,.04)', border:'1px solid #1e2d3d', color:'#64748b', borderRadius:7, fontSize:11, cursor:'pointer', fontFamily:'inherit' }}>✏️ Editar</button>
+              <button onClick={() => onSendText && onSendText(null, aiText)} style={{ flex:1, padding:'6px', background:'rgba(255,255,255,.04)', border:'1px solid #2a3f55', color:'#94a3b8', borderRadius:7, fontSize:11, cursor:'pointer', fontFamily:'inherit' }}>✏️ Editar</button>
             </div>
           </>
         ) : (
-          <div style={{ padding:'12px', textAlign:'center', color:'#334155', fontSize:11, background:'rgba(255,255,255,.02)', borderRadius:8, border:'1px dashed #1a2d40' }}>
+          <div style={{ padding:'12px', textAlign:'center', color:'#94a3b8', fontSize:11, background:'rgba(255,255,255,.02)', borderRadius:8, border:'1px dashed #2a3f55' }}>
             Esperando mensaje...
           </div>
         )}
@@ -342,9 +342,9 @@ export default function RightPanel({ activeConv, onQuickReply, onSendText, onSen
       {/* ── RESPUESTAS RÁPIDAS — scroll independiente ── */}
       <div style={{ flex:1, overflowY:'auto', minHeight:0 }}>
         <div style={{ padding:'10px 12px 6px' }}>
-          <p style={{ fontSize:10, color:'#334155', fontWeight:700, letterSpacing:'.08em', display:'flex', alignItems:'center', gap:5 }}>
+          <p style={{ fontSize:10, color:'#94a3b8', fontWeight:700, letterSpacing:'.08em', display:'flex', alignItems:'center', gap:5 }}>
             ⚡ RESPUESTAS RÁPIDAS
-            {!repliesLoaded && <span style={{ fontSize:9, color:'#2a3f55' }}>cargando...</span>}
+            {!repliesLoaded && <span style={{ fontSize:9, color:'#94a3b8' }}>cargando...</span>}
           </p>
         </div>
 
@@ -363,13 +363,13 @@ export default function RightPanel({ activeConv, onQuickReply, onSendText, onSen
                         <button onClick={() => { setEditImgUrl(''); setEditImgPrev(''); if(editFileRef.current) editFileRef.current.value='' }} style={{ position:'absolute', top:2, right:2, background:'rgba(0,0,0,.6)', border:'none', color:'#fff', borderRadius:'50%', width:16, height:16, cursor:'pointer', fontSize:8, display:'flex', alignItems:'center', justifyContent:'center' }}>✕</button>
                       </div>
                     ) : (
-                      <button onClick={() => editFileRef.current?.click()} style={{ width:'100%', padding:'4px', background:'transparent', border:'1px dashed #1e2d3d', borderRadius:6, color:'#334155', fontSize:10, cursor:'pointer', fontFamily:'inherit' }}>📷 Imagen</button>
+                      <button onClick={() => editFileRef.current?.click()} style={{ width:'100%', padding:'4px', background:'transparent', border:'1px dashed #2a3f55', borderRadius:6, color:'#94a3b8', fontSize:10, cursor:'pointer', fontFamily:'inherit' }}>📷 Imagen</button>
                     )}
                     <input ref={editFileRef} type="file" accept="image/*" style={{ display:'none' }} onChange={async e => { const f=e.target.files[0]; if(!f)return; setEditImgPrev(URL.createObjectURL(f)); await uploadImg(f,setEditImgUrl,setEditImgPrev,setEditUploading) }} />
                   </div>
                   <div style={{ display:'flex', gap:3 }}>
                     <button onClick={saveEdit} disabled={editUploading} style={{ flex:1, padding:'4px', background:'rgba(37,211,102,.15)', border:'1px solid rgba(37,211,102,.3)', color:'#25d366', borderRadius:6, fontSize:10, cursor:'pointer', fontFamily:'inherit' }}>✓ Guardar</button>
-                    <button onClick={() => { setEditingIdx(null); setEditText(''); setEditImgUrl(''); setEditImgPrev('') }} style={{ flex:1, padding:'4px', background:'transparent', border:'1px solid #1e2d3d', color:'#475569', borderRadius:6, fontSize:10, cursor:'pointer', fontFamily:'inherit' }}>✕</button>
+                    <button onClick={() => { setEditingIdx(null); setEditText(''); setEditImgUrl(''); setEditImgPrev('') }} style={{ flex:1, padding:'4px', background:'transparent', border:'1px solid #2a3f55', color:'#94a3b8', borderRadius:6, fontSize:10, cursor:'pointer', fontFamily:'inherit' }}>✕</button>
                   </div>
                 </div>
               ) : (

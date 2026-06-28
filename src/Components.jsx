@@ -70,14 +70,14 @@ export function ContactRow({ conv, isActive, onClick }) {
           <span style={{ fontWeight: 700, fontSize: 14, color: '#e2e8f0' }}>
             {conv.nombre}
           </span>
-          <span style={{ fontSize: 11, color: '#334155', flexShrink: 0, marginLeft: 6 }}>
+          <span style={{ fontSize: 11, color: '#94a3b8', flexShrink: 0, marginLeft: 6 }}>
             {fmtTime(conv.last?.timestamp)}
           </span>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 3 }}>
           <span style={{
             fontSize: 12,
-            color: conv.unread > 0 ? '#94a3b8' : '#475569',
+            color: conv.unread > 0 ? '#94a3b8' : '#8899aa',
             overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
             maxWidth: 175,
             fontWeight: conv.unread > 0 ? 600 : 400,
@@ -335,7 +335,7 @@ export function MessageBubble({ msg, allMsgs }) {
         })()}
 
         {!hasText && !hasMedia && (
-          <p style={{ margin: 0, fontSize: 13, color: '#334155', fontStyle: 'italic' }}>
+          <p style={{ margin: 0, fontSize: 13, color: '#94a3b8', fontStyle: 'italic' }}>
             {msg.tipo ? `[${msg.tipo}]` : '[mensaje]'}
           </p>
         )}
@@ -344,7 +344,7 @@ export function MessageBubble({ msg, allMsgs }) {
           display: 'flex', justifyContent: 'flex-end',
           alignItems: 'center', gap: 5, marginTop: 4,
         }}>
-          <span style={{ fontSize: 10, color: '#334155' }}>
+          <span style={{ fontSize: 10, color: '#94a3b8' }}>
             {(() => {
               const d = new Date(msg.timestamp)
               const today = new Date()
