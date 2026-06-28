@@ -247,10 +247,10 @@ export default function RightPanel({ activeConv, onQuickReply, onSendText, onSen
         <div style={{ marginTop:7, display:'flex', gap:6 }}>
           {[['📥', activeConv.msgs.filter(m=>m.direccion==='ENTRANTE').length, 'Recibidos'],
             ['📤', activeConv.msgs.filter(m=>m.direccion==='SALIENTE').length, 'Enviados']].map(([ic,val,label]) => (
-            <div key={label} style={{ flex:1, background:'rgba(255,255,255,.03)', border:'1px solid #111c2a', borderRadius:8, padding:'6px 4px', textAlign:'center' }}>
-              <div style={{ fontSize:13 }}>{ic}</div>
-              <div style={{ fontSize:14, fontWeight:800, color:'#f1f5f9', marginTop:1 }}>{val}</div>
-              <div style={{ fontSize:9, color:'#334155' }}>{label}</div>
+            <div key={label} style={{ flex:1, background:'rgba(255,255,255,.03)', border:'1px solid #111c2a', borderRadius:8, padding:'8px 6px', textAlign:'center' }}>
+              <div style={{ fontSize:11, color:'#334155', marginBottom:2 }}>{label}</div>
+              <div style={{ fontSize:22, fontWeight:800, color:'#f1f5f9', lineHeight:1 }}>{val}</div>
+              <div style={{ fontSize:16, marginTop:2 }}>{ic}</div>
             </div>
           ))}
         </div>
@@ -270,7 +270,7 @@ export default function RightPanel({ activeConv, onQuickReply, onSendText, onSen
                 <img
                   src={aiImgPrev || aiImgShopify}
                   alt="Producto"
-                  style={{ width:'100%', height:130, objectFit:'cover', display:'block' }}
+                  style={{ width:'100%', height:160, objectFit:'contain', background:'#0a0f1a', display:'block' }}
                   onError={e => e.currentTarget.style.display='none'}
                 />
                 {aiImgUploading && (
@@ -385,7 +385,7 @@ export default function RightPanel({ activeConv, onQuickReply, onSendText, onSen
                 <div style={{ background:'rgba(255,255,255,.02)', border:'1px solid #111c2a', borderRadius:8, overflow:'hidden', transition:'background .1s' }}
                   onMouseEnter={e => e.currentTarget.style.background='rgba(255,255,255,.04)'}
                   onMouseLeave={e => e.currentTarget.style.background='rgba(255,255,255,.02)'}>
-                  {reply.imageUrl && <img src={reply.imageUrl} style={{ width:'100%', height:80, objectFit:'cover', display:'block' }} alt="" onError={e => e.currentTarget.style.display='none'} />}
+                  {reply.imageUrl && <img src={reply.imageUrl} style={{ width:'100%', height:120, objectFit:'contain', background:'#0a0f1a', display:'block' }} alt="" onError={e => e.currentTarget.style.display='none'} />}
                   <div style={{ padding:'7px 9px', display:'flex', alignItems:'flex-start', gap:3 }}>
                     <span style={{ flex:1, fontSize:12, color:'#94a3b8', lineHeight:1.4, overflow:'hidden', textOverflow:'ellipsis', display:'-webkit-box', WebkitLineClamp:3, WebkitBoxOrient:'vertical' }}>
                       {reply.imageUrl && '🖼 '}{reply.text}
