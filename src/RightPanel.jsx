@@ -402,9 +402,9 @@ export default function RightPanel({ activeConv, onQuickReply, onSendText, onSen
 
         {/* Nueva respuesta */}
         <div style={{ margin:'8px 12px 14px', background:'rgba(255,255,255,.02)', border:'1px dashed #1a2d40', borderRadius:8, padding:'7px' }}>
-          <p style={{ fontSize:9, color:'#334155', fontWeight:700, letterSpacing:'.06em', marginBottom:5 }}>+ NUEVA</p>
+          <p style={{ fontSize:9, color:'#ffffff', fontWeight:700, letterSpacing:'.06em', marginBottom:5 }}>+ NUEVA</p>
           <textarea value={newText} onChange={e => setNewText(e.target.value)} placeholder="Texto..." rows={2}
-            style={{ width:'100%', background:'#111c2a', border:'1px solid #1e2d3d', borderRadius:6, color:'#e2e8f0', fontSize:11, padding:'5px 7px', resize:'none', outline:'none', fontFamily:'inherit', marginBottom:5, whiteSpace:'pre-wrap' }}
+            style={{ width:'100%', background:'#111c2a', border:'1px solid #1e2d3d', borderRadius:6, color:'#ffffff', fontSize:11, padding:'5px 7px', resize:'none', outline:'none', fontFamily:'inherit', marginBottom:5, whiteSpace:'pre-wrap' }}
             onFocus={e => e.target.style.borderColor='#25d366'} onBlur={e => e.target.style.borderColor='#1e2d3d'} />
           <div style={{ marginBottom:5 }}>
             {newImgPrev ? (
@@ -414,11 +414,11 @@ export default function RightPanel({ activeConv, onQuickReply, onSendText, onSen
                 <button onClick={() => { setNewImgUrl(''); setNewImgPrev(''); if(newFileRef.current) newFileRef.current.value='' }} style={{ position:'absolute', top:2, right:2, background:'rgba(0,0,0,.6)', border:'none', color:'#fff', borderRadius:'50%', width:16, height:16, cursor:'pointer', fontSize:8, display:'flex', alignItems:'center', justifyContent:'center' }}>✕</button>
               </div>
             ) : (
-              <button onClick={() => newFileRef.current?.click()} style={{ width:'100%', padding:'4px', background:'transparent', border:'1px dashed #1e2d3d', borderRadius:6, color:'#334155', fontSize:10, cursor:'pointer', fontFamily:'inherit' }}>📷 Imagen (opcional)</button>
+              <button onClick={() => newFileRef.current?.click()} style={{ width:'100%', padding:'4px', background:'transparent', border:'1px dashed #475569', borderRadius:6, color:'#ffffff', fontSize:10, cursor:'pointer', fontFamily:'inherit' }}>📷 Imagen (opcional)</button>
             )}
             <input ref={newFileRef} type="file" accept="image/*" style={{ display:'none' }} onChange={async e => { const f=e.target.files[0]; if(!f)return; setNewImgPrev(URL.createObjectURL(f)); await uploadImg(f,setNewImgUrl,setNewImgPrev,setNewUploading) }} />
           </div>
-          <button onClick={addReply} disabled={!newText.trim()||newUploading} style={{ width:'100%', padding:'6px', background:newText.trim()&&!newUploading?'rgba(37,211,102,.1)':'transparent', border:`1px solid ${newText.trim()&&!newUploading?'rgba(37,211,102,.3)':'#1e2d3d'}`, color:newText.trim()&&!newUploading?'#25d366':'#334155', borderRadius:7, fontSize:11, fontWeight:600, cursor:newText.trim()&&!newUploading?'pointer':'default', fontFamily:'inherit', transition:'all .15s' }}>
+          <button onClick={addReply} disabled={!newText.trim()||newUploading} style={{ width:'100%', padding:'6px', background:newText.trim()&&!newUploading?'rgba(37,211,102,.1)':'transparent', border:`1px solid ${newText.trim()&&!newUploading?'rgba(37,211,102,.3)':'#475569'}`, color:newText.trim()&&!newUploading?'#25d366':'#ffffff', borderRadius:7, fontSize:11, fontWeight:600, cursor:newText.trim()&&!newUploading?'pointer':'default', fontFamily:'inherit', transition:'all .15s' }}>
             {newUploading?'Subiendo...':'+ Agregar'}
           </button>
         </div>
@@ -435,7 +435,7 @@ export default function RightPanel({ activeConv, onQuickReply, onSendText, onSen
           onChange={e => { setNotasInput(e.target.value); setNotasSaved(false) }}
           placeholder="Ej: Falta que envíe la foto del pago..."
           rows={2}
-          style={{ width:'100%', background:'#111c2a', border:'1px solid #1e2d3d', borderRadius:7, color:'#e2e8f0', fontSize:11, padding:'6px 8px', resize:'vertical', outline:'none', fontFamily:'inherit', whiteSpace:'pre-wrap', minHeight:46 }}
+          style={{ width:'100%', background:'#111c2a', border:'1px solid #1e2d3d', borderRadius:7, color:'#ffffff', fontSize:11, padding:'6px 8px', resize:'vertical', outline:'none', fontFamily:'inherit', whiteSpace:'pre-wrap', minHeight:46 }}
           onFocus={e => e.target.style.borderColor='#f59e0b'} onBlur={e => e.target.style.borderColor='#1e2d3d'}
         />
         <button onClick={handleSaveNotas} disabled={notasSaving}
