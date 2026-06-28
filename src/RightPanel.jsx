@@ -244,16 +244,7 @@ export default function RightPanel({ activeConv, onQuickReply, onSendText, onSen
             <span style={{ fontFamily:'monospace', fontSize:11, color:'#64748b' }}>Expirada</span>
           )}
         </div>
-        <div style={{ marginTop:7, display:'flex', gap:6 }}>
-          {[['📥', activeConv.msgs.filter(m=>m.direccion==='ENTRANTE').length, 'Recibidos'],
-            ['📤', activeConv.msgs.filter(m=>m.direccion==='SALIENTE').length, 'Enviados']].map(([ic,val,label]) => (
-            <div key={label} style={{ flex:1, background:'rgba(255,255,255,.03)', border:'1px solid #111c2a', borderRadius:8, padding:'8px 6px', textAlign:'center' }}>
-              <div style={{ fontSize:11, color:'#334155', marginBottom:2 }}>{label}</div>
-              <div style={{ fontSize:22, fontWeight:800, color:'#f1f5f9', lineHeight:1 }}>{val}</div>
-              <div style={{ fontSize:16, marginTop:2 }}>{ic}</div>
-            </div>
-          ))}
-        </div>
+
       </div>
 
       {/* ── SUGERENCIA IA — fija ── */}
@@ -382,18 +373,25 @@ export default function RightPanel({ activeConv, onQuickReply, onSendText, onSen
                   </div>
                 </div>
               ) : (
-                <div style={{ background:'rgba(255,255,255,.02)', border:'1px solid #111c2a', borderRadius:8, overflow:'hidden', transition:'background .1s' }}
+                <div style={{ background:'rgba(255,255,255,.02)', border:'1px solid #111c2a', borderRadius:8, overflow:'hidden', transition:'background .1s', display:'flex', alignItems:'stretch' }}
                   onMouseEnter={e => e.currentTarget.style.background='rgba(255,255,255,.04)'}
-                  onMouseLeave={e => e.currentTarget.style.background='rgba(255,255,255,.02)'}>
-                  {reply.imageUrl && <img src={reply.imageUrl} style={{ width:'100%', height:120, objectFit:'contain', background:'#0a0f1a', display:'block' }} alt="" onError={e => e.currentTarget.style.display='none'} />}
-                  <div style={{ padding:'7px 9px', display:'flex', alignItems:'flex-start', gap:3 }}>
-                    <span style={{ flex:1, fontSize:12, color:'#94a3b8', lineHeight:1.4, overflow:'hidden', textOverflow:'ellipsis', display:'-webkit-box', WebkitLineClamp:3, WebkitBoxOrient:'vertical' }}>
-                      {reply.imageUrl && '🖼 '}{reply.text}
+                  onMouseLeave={e => e.currentTarget.style.background='rgba(255,255,255,.02)'}
+                >
+                  {/* Imagen izquierda */}
+                  {reply.imageUrl && (
+                    <div style={{ width:90, flexShrink:0 }}>
+                      <img src={reply.imageUrl} style={{ width:90, height:'100%', minHeight:72, objectFit:'cover', display:'block' }} alt="" onError={e => e.currentTarget.style.display='none'} />
+                    </div>
+                  )}
+                  {/* Texto + botones derecha */}
+                  <div style={{ flex:1, padding:'7px 8px', display:'flex', flexDirection:'column', justifyContent:'space-between', gap:4, minWidth:0 }}>
+                    <span style={{ fontSize:12, color:'#94a3b8', lineHeight:1.4, overflow:'hidden', textOverflow:'ellipsis', display:'-webkit-box', WebkitLineClamp:3, WebkitBoxOrient:'vertical' }}>
+                      {reply.text}
                     </span>
-                    <div style={{ display:'flex', gap:2, flexShrink:0 }}>
-                      <button onClick={() => handleSendQuick(idx)} disabled={sending===idx||!windowOpen} title="Enviar" style={{ background:'rgba(37,211,102,.12)', border:'1px solid rgba(37,211,102,.2)', color:'#25d366', borderRadius:5, width:20, height:20, cursor:'pointer', fontSize:9, display:'flex', alignItems:'center', justifyContent:'center' }}>{sending===idx?'⏳':'➤'}</button>
-                      <button onClick={() => startEdit(idx)} style={{ background:'transparent', border:'none', color:'#334155', cursor:'pointer', fontSize:10, padding:'0 2px' }}>✏️</button>
-                      <button onClick={() => deleteReply(idx)} style={{ background:'transparent', border:'none', color:'#334155', cursor:'pointer', fontSize:10, padding:'0 2px' }}>🗑️</button>
+                    <div style={{ display:'flex', gap:4, justifyContent:'flex-end' }}>
+                      <button onClick={() => handleSendQuick(idx)} disabled={sending===idx||!windowOpen} title="Enviar" style={{ background:'rgba(37,211,102,.12)', border:'1px solid rgba(37,211,102,.2)', color:'#25d366', borderRadius:5, padding:'3px 8px', fontSize:10, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>{sending===idx?'⏳':'▶ Enviar'}</button>
+                      <button onClick={() => startEdit(idx)} style={{ background:'transparent', border:'1px solid #1e2d3d', color:'#64748b', borderRadius:5, padding:'3px 6px', fontSize:10, cursor:'pointer', fontFamily:'inherit' }}>✏️</button>
+                      <button onClick={() => deleteReply(idx)} style={{ background:'transparent', border:'1px solid #1e2d3d', color:'#64748b', borderRadius:5, padding:'3px 6px', fontSize:10, cursor:'pointer', fontFamily:'inherit' }}>🗑</button>
                     </div>
                   </div>
                 </div>
