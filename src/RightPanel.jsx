@@ -54,6 +54,9 @@ export default function RightPanel({ activeConv, onQuickReply, onSendText, onSen
   }, [activeConv])
   const [replies,       setReplies]       = useState([])
   const [repliesLoaded, setRepliesLoaded] = useState(false)
+  const [repliesOpen,   setRepliesOpen]   = useState(true)
+  const [nuevaOpen,     setNuevaOpen]     = useState(false)
+  const [notasOpen,     setNotasOpen]     = useState(false)
   const [editingIdx,    setEditingIdx]    = useState(null)
   const [editText,      setEditText]      = useState('')
   const [editImgUrl,    setEditImgUrl]    = useState('')
@@ -341,15 +344,19 @@ export default function RightPanel({ activeConv, onQuickReply, onSendText, onSen
 
       {/* ── RESPUESTAS RÁPIDAS — scroll independiente ── */}
       <div style={{ flex:1, overflowY:'auto', minHeight:0 }}>
-        <div style={{ padding:'10px 12px 6px' }}>
-          <p style={{ fontSize:10, color:'#94a3b8', fontWeight:700, letterSpacing:'.08em', display:'flex', alignItems:'center', gap:5 }}>
+        <div
+          onClick={() => setRepliesOpen(o => !o)}
+          style={{ padding:'10px 12px 6px', cursor:'pointer', userSelect:'none' }}
+        >
+          <p style={{ fontSize:10, color:'#94a3b8', fontWeight:700, letterSpacing:'.08em', display:'flex', alignItems:'center', gap:5, margin:0 }}>
+            <span style={{ fontSize:9, color:'#475569', transition:'transform .2s', display:'inline-block', transform: repliesOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}>▶</span>
             ⚡ RESPUESTAS RÁPIDAS
             {!repliesLoaded && <span style={{ fontSize:9, color:'#94a3b8' }}>cargando...</span>}
-            <button onClick={() => setRepliesLoaded(false)} title="Recargar" style={{ marginLeft:'auto', background:'transparent', border:'none', color:'#475569', fontSize:12, cursor:'pointer', padding:'0 2px', lineHeight:1 }}>🔄</button>
+            <span onClick={e => { e.stopPropagation(); setRepliesLoaded(false) }} title="Recargar" style={{ marginLeft:'auto', background:'transparent', border:'none', color:'#475569', fontSize:12, cursor:'pointer', padding:'0 2px', lineHeight:1 }}>🔄</span>
           </p>
         </div>
 
-        <div style={{ padding:'0 12px', display:'flex', flexDirection:'column', gap:5 }}>
+        {repliesOpen && <div style={{ padding:'0 12px', display:'flex', flexDirection:'column', gap:5 }}>
           {replies.map((reply, idx) => (
             <div key={reply.id || idx}>
               {editingIdx === idx ? (
@@ -401,9 +408,18 @@ export default function RightPanel({ activeConv, onQuickReply, onSendText, onSen
           ))}
         </div>
 
+        }
+
         {/* Nueva respuesta */}
-        <div style={{ margin:'8px 12px 14px', background:'rgba(255,255,255,.02)', border:'1px dashed #1a2d40', borderRadius:8, padding:'7px' }}>
-          <p style={{ fontSize:9, color:'#ffffff', fontWeight:700, letterSpacing:'.06em', marginBottom:5 }}>+ NUEVA</p>
+        <div style={{ margin:'8px 12px 14px', background:'rgba(255,255,255,.02)', border:'1px dashed #1a2d40', borderRadius:8, overflow:'hidden' }}>
+          <div
+            onClick={() => setNuevaOpen(o => !o)}
+            style={{ padding:'7px 9px', cursor:'pointer', userSelect:'none', display:'flex', alignItems:'center', gap:5 }}
+          >
+            <span style={{ fontSize:9, color:'#475569', transition:'transform .2s', display:'inline-block', transform: nuevaOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}>▶</span>
+            <p style={{ fontSize:9, color:'#ffffff', fontWeight:700, letterSpacing:'.06em', margin:0 }}>+ NUEVA RESPUESTA</p>
+          </div>
+          {nuevaOpen && <div style={{ padding:'0 7px 7px' }}>
           <textarea value={newText} onChange={e => setNewText(e.target.value)} placeholder="Texto..." rows={2}
             style={{ width:'100%', background:'#111c2a', border:'1px solid #1e2d3d', borderRadius:6, color:'#ffffff', fontSize:11, padding:'5px 7px', resize:'none', outline:'none', fontFamily:'inherit', marginBottom:5, whiteSpace:'pre-wrap' }}
             onFocus={e => e.target.style.borderColor='#25d366'} onBlur={e => e.target.style.borderColor='#1e2d3d'} />
@@ -419,19 +435,26 @@ export default function RightPanel({ activeConv, onQuickReply, onSendText, onSen
             )}
             <input ref={newFileRef} type="file" accept="image/*" style={{ display:'none' }} onChange={async e => { const f=e.target.files[0]; if(!f)return; setNewImgPrev(URL.createObjectURL(f)); await uploadImg(f,setNewImgUrl,setNewImgPrev,setNewUploading) }} />
           </div>
-          <button onClick={addReply} disabled={!newText.trim()||newUploading} style={{ width:'100%', padding:'6px', background:newText.trim()&&!newUploading?'rgba(37,211,102,.1)':'transparent', border:`1px solid ${newText.trim()&&!newUploading?'rgba(37,211,102,.3)':'#475569'}`, color:newText.trim()&&!newUploading?'#25d366':'#ffffff', borderRadius:7, fontSize:11, fontWeight:600, cursor:newText.trim()&&!newUploading?'pointer':'default', fontFamily:'inherit', transition:'all .15s' }}>
-            {newUploading?'Subiendo...':'+ Agregar'}
-          </button>
+            <button onClick={addReply} disabled={!newText.trim()||newUploading} style={{ width:'100%', padding:'6px', background:newText.trim()&&!newUploading?'rgba(37,211,102,.1)':'transparent', border:`1px solid ${newText.trim()&&!newUploading?'rgba(37,211,102,.3)':'#475569'}`, color:newText.trim()&&!newUploading?'#25d366':'#ffffff', borderRadius:7, fontSize:11, fontWeight:600, cursor:newText.trim()&&!newUploading?'pointer':'default', fontFamily:'inherit', transition:'all .15s' }}>
+              {newUploading?'Subiendo...':'+ Agregar'}
+            </button>
+          </div>}
         </div>
       </div>
 
       {/* ── NOTAS DEL VENDEDOR ── */}
-      <div style={{ flexShrink:0, padding:'10px 12px', borderTop:'1px solid #111c2a', background:'#0a1019' }}>
-        <p style={{ fontSize:10, color:'#f59e0b', fontWeight:700, letterSpacing:'.08em', marginBottom:6, display:'flex', alignItems:'center', gap:5 }}>
-          📝 NOTAS
-          {notasSaved && <span style={{ fontSize:8, background:'rgba(37,211,102,.15)', color:'#25d366', borderRadius:10, padding:'1px 6px' }}>Guardado ✓</span>}
-        </p>
-        <textarea
+      <div style={{ flexShrink:0, borderTop:'1px solid #111c2a', background:'#0a1019' }}>
+        <div
+          onClick={() => setNotasOpen(o => !o)}
+          style={{ padding:'10px 12px 6px', cursor:'pointer', userSelect:'none', display:'flex', alignItems:'center', gap:5 }}
+        >
+          <span style={{ fontSize:9, color:'#475569', transition:'transform .2s', display:'inline-block', transform: notasOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}>▶</span>
+          <p style={{ fontSize:10, color:'#f59e0b', fontWeight:700, letterSpacing:'.08em', margin:0, display:'flex', alignItems:'center', gap:5 }}>
+            📝 NOTAS
+            {notasSaved && <span style={{ fontSize:8, background:'rgba(37,211,102,.15)', color:'#25d366', borderRadius:10, padding:'1px 6px' }}>Guardado ✓</span>}
+          </p>
+        </div>
+        {notasOpen && <><textarea
           value={notasInput}
           onChange={e => { setNotasInput(e.target.value); setNotasSaved(false) }}
           placeholder="Ej: Falta que envíe la foto del pago..."
@@ -442,7 +465,7 @@ export default function RightPanel({ activeConv, onQuickReply, onSendText, onSen
         <button onClick={handleSaveNotas} disabled={notasSaving}
           style={{ width:'100%', marginTop:5, padding:'6px', background: notasSaving ? '#111c2a' : 'rgba(245,158,11,.12)', border:'1px solid rgba(245,158,11,.3)', color:'#f59e0b', borderRadius:7, fontSize:11, fontWeight:700, cursor: notasSaving ? 'default' : 'pointer', fontFamily:'inherit', transition:'all .15s' }}>
           {notasSaving ? '⏳ Guardando...' : '💾 Guardar nota'}
-        </button>
+        </button></> }
       </div>
     </div>
   )
