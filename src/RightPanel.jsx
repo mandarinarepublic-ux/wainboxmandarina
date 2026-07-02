@@ -57,6 +57,7 @@ export default function RightPanel({ activeConv, onQuickReply, onSendText, onSen
   const [repliesOpen,   setRepliesOpen]   = useState(true)
   const [nuevaOpen,     setNuevaOpen]     = useState(false)
   const [notasOpen,     setNotasOpen]     = useState(false)
+  const [iaOpen,        setIaOpen]        = useState(true)
   const [editingIdx,    setEditingIdx]    = useState(null)
   const [editText,      setEditText]      = useState('')
   const [editImgUrl,    setEditImgUrl]    = useState('')
@@ -251,11 +252,18 @@ export default function RightPanel({ activeConv, onQuickReply, onSendText, onSen
       </div>
 
       {/* ── SUGERENCIA IA — fija ── */}
-      <div style={{ flexShrink:0, padding:'10px 12px', borderBottom:'1px solid #111c2a' }}>
-        <p style={{ fontSize:10, color:'#6366f1', fontWeight:700, letterSpacing:'.08em', marginBottom:6, display:'flex', alignItems:'center', gap:5 }}>
-          🤖 SUGERENCIA IA
-          {aiSuggestion && <span style={{ fontSize:8, background:'rgba(99,102,241,.15)', color:'#818cf8', borderRadius:10, padding:'1px 6px' }}>Gemini</span>}
-        </p>
+      <div style={{ flexShrink:0, borderBottom:'1px solid #111c2a' }}>
+        <div
+          onClick={() => setIaOpen(o => !o)}
+          style={{ padding:'10px 12px 6px', cursor:'pointer', userSelect:'none', display:'flex', alignItems:'center', gap:5 }}
+        >
+          <span style={{ fontSize:9, color:'#475569', transition:'transform .2s', display:'inline-block', transform: iaOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}>▶</span>
+          <p style={{ fontSize:10, color:'#6366f1', fontWeight:700, letterSpacing:'.08em', margin:0, display:'flex', alignItems:'center', gap:5 }}>
+            🤖 SUGERENCIA IA
+            {aiSuggestion && <span style={{ fontSize:8, background:'rgba(99,102,241,.15)', color:'#818cf8', borderRadius:10, padding:'1px 6px' }}>Gemini</span>}
+          </p>
+        </div>
+        {iaOpen && <div style={{ padding:'0 12px 10px' }}>
         {aiSuggestion ? (
           <>
             {/* ── Imagen del producto Shopify ── */}
@@ -340,6 +348,7 @@ export default function RightPanel({ activeConv, onQuickReply, onSendText, onSen
             Esperando mensaje...
           </div>
         )}
+        </div>}
       </div>
 
       {/* ── RESPUESTAS RÁPIDAS — scroll independiente ── */}
