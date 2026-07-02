@@ -345,6 +345,7 @@ export default function RightPanel({ activeConv, onQuickReply, onSendText, onSen
           <p style={{ fontSize:10, color:'#94a3b8', fontWeight:700, letterSpacing:'.08em', display:'flex', alignItems:'center', gap:5 }}>
             ⚡ RESPUESTAS RÁPIDAS
             {!repliesLoaded && <span style={{ fontSize:9, color:'#94a3b8' }}>cargando...</span>}
+            <button onClick={() => setRepliesLoaded(false)} title="Recargar" style={{ marginLeft:'auto', background:'transparent', border:'none', color:'#475569', fontSize:12, cursor:'pointer', padding:'0 2px', lineHeight:1 }}>🔄</button>
           </p>
         </div>
 
