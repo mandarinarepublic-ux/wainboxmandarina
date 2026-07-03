@@ -95,9 +95,9 @@ export default function App() {
   const [toast,        setToast]        = useState(null)
   const [showSidebar,  setShowSidebar]  = useState(true)
   const [showRight,    setShowRight]    = useState(false)
-  const [imgPreview,   setImgPreview]   = useState(null)
-  const [imgFile,      setImgFile]      = useState(null)
+  const [imgFiles,     setImgFiles]     = useState([]) // array de { file, preview }
   const [imgUploading, setImgUploading] = useState(false)
+  const [imgProgress,  setImgProgress]  = useState(0)
   const [imgResult,    setImgResult]    = useState(null)
   const [isVideo,      setIsVideo]      = useState(false)
   const [filter,       setFilter]       = useState('pendiente')
@@ -322,56 +322,53 @@ export default function App() {
   }
 
   const handleFileSelect = async (e) => {
-    const file = e.target.files[0]; if (!file) return
+    const files = Array.from(e.target.files)
+    if (!files.length) return
     setImgResult(null)
-    const isVid = file.type.startsWith('video/')
+    const isVid = files[0].type.startsWith('video/')
     setIsVideo(isVid)
     if (isVid) {
-      // Para video: preview con URL objeto, guardar archivo original
-      setImgPreview(URL.createObjectURL(file))
-      setImgFile(file)
+      setImgFiles([{ file: files[0], preview: URL.createObjectURL(files[0]) }])
     } else {
-      // Para imagen: convertir a JPEG como antes
-      const reader = new FileReader()
-      reader.onload = (ev) => setImgPreview(ev.target.result)
-      reader.readAsDataURL(file)
-      setImgFile(await toJpeg(file))
+      const processed = await Promise.all(files.slice(0, 10).map(async f => ({
+        file: await toJpeg(f),
+        preview: await new Promise(res => { const r = new FileReader(); r.onload = ev => res(ev.target.result); r.readAsDataURL(f) })
+      })))
+      setImgFiles(processed)
     }
   }
 
   const handleSendImage = async () => {
-    if (!imgFile || !activeConv) return
-    setImgUploading(true); setImgResult(null)
+    if (!imgFiles.length || !activeConv) return
+    setImgUploading(true); setImgResult(null); setImgProgress(0)
     try {
-      let ok = false
+      let allOk = true
       if (isVideo) {
-        // ── VIDEO: upload directo a Meta Media API ──
-        const result = await sendVideo(activeConv.telefono, activeConv.nombre, imgFile)
-        ok = result.ok
+        const result = await sendVideo(activeConv.telefono, activeConv.nombre, imgFiles[0].file)
+        allOk = result.ok
       } else {
-        // ── IMAGEN: ImgBB como siempre ──
-        const fd = new FormData(); fd.append('image', imgFile)
-        const res  = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, { method:'POST', body:fd })
-        const data = await res.json()
-        if (!data.success) throw new Error()
-        ok = await sendImageUrl(data.data.url)
+        for (let i = 0; i < imgFiles.length; i++) {
+          const fd = new FormData(); fd.append('image', imgFiles[i].file)
+          const res  = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, { method:'POST', body:fd })
+          const data = await res.json()
+          if (!data.success) { allOk = false; continue }
+          const ok = await sendImageUrl(data.data.url)
+          if (!ok) allOk = false
+          setImgProgress(i + 1)
+          if (i < imgFiles.length - 1) await new Promise(r => setTimeout(r, 800))
+        }
       }
-      if (ok) {
-        setImgResult({ ok: true })
-        await changeStatus(activeConv.telefono, currentStatus === 'ventaproceso' ? 'ventaproceso' : 'atendido')
-        setTimeout(() => {
-          setImgPreview(null); setImgFile(null); setImgResult(null); setIsVideo(false)
-          if (fileRef.current) fileRef.current.value = ''
-        }, 1500)
-        setTimeout(load, 4000)
-      } else throw new Error()
+      setImgResult({ ok: allOk })
+      await changeStatus(activeConv.telefono, currentStatus === 'ventaproceso' ? 'ventaproceso' : 'atendido')
+      setTimeout(() => { setImgFiles([]); setImgResult(null); setIsVideo(false); setImgProgress(0); if (fileRef.current) fileRef.current.value = '' }, 1500)
+      setTimeout(load, 4000)
     } catch { setImgResult({ ok: false }) }
     finally  { setImgUploading(false) }
   }
 
   const cancelImage = () => {
-    if (isVideo && imgPreview) URL.revokeObjectURL(imgPreview)
-    setImgPreview(null); setImgFile(null); setImgResult(null); setIsVideo(false)
+    imgFiles.forEach(f => { if (isVideo) URL.revokeObjectURL(f.preview) })
+    setImgFiles([]); setImgResult(null); setIsVideo(false); setImgProgress(0)
     if (fileRef.current) fileRef.current.value = ''
   }
 
@@ -695,36 +692,54 @@ export default function App() {
                   ⚠️ Ventana de 24h cerrada
                 </div>
               )}
-              {imgPreview && (
-                <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:8, padding:'8px 12px', background:'#0d1828', border:'1px solid #1a2d40', borderRadius:12 }}>
-                  {isVideo ? (
-                    <video src={imgPreview} style={{ width:64, height:44, borderRadius:8, objectFit:'cover', flexShrink:0 }} muted />
-                  ) : (
-                    <img src={imgPreview} style={{ width:44, height:44, borderRadius:8, objectFit:'cover', flexShrink:0 }} alt="preview" />
-                  )}
-                  <div style={{ flex:1, minWidth:0 }}>
-                    <div style={{ fontSize:11, color:'#64748b', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{imgFile?.name}</div>
-                    <div style={{ fontSize:10, color:'#334155', marginTop:2 }}>
-                      {isVideo
-                        ? `${(imgFile?.size/1024/1024).toFixed(1)} MB · VIDEO`
-                        : imgFile ? `${(imgFile.size/1024).toFixed(0)} KB · JPEG` : ''}
-                    </div>
+              {imgFiles.length > 0 && (
+                <div style={{ marginBottom:8, padding:'8px 12px', background:'#0d1828', border:'1px solid #1a2d40', borderRadius:12 }}>
+                  <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:8 }}>
+                    {imgFiles.map((item, i) => (
+                      <div key={i} style={{ position:'relative' }}>
+                        {isVideo
+                          ? <video src={item.preview} style={{ width:64, height:44, borderRadius:8, objectFit:'cover' }} muted />
+                          : <img src={item.preview} style={{ width:44, height:44, borderRadius:8, objectFit:'cover' }} alt={`preview-${i}`} />
+                        }
+                        {imgUploading && imgProgress > i && (
+                          <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,.5)', borderRadius:8, display:'flex', alignItems:'center', justifyContent:'center', fontSize:14, color:'#25d366' }}>✓</div>
+                        )}
+                        {!imgUploading && !imgResult && (
+                          <button onClick={() => setImgFiles(prev => prev.filter((_,j) => j!==i))}
+                            style={{ position:'absolute', top:-4, right:-4, width:16, height:16, borderRadius:'50%', background:'#f87171', border:'none', color:'#fff', fontSize:9, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', lineHeight:1 }}>✕</button>
+                        )}
+                      </div>
+                    ))}
                   </div>
-                  {imgResult ? (
-                    <span style={{ fontSize:13, fontWeight:700, color:imgResult.ok?'#25d366':'#f87171', flexShrink:0 }}>{imgResult.ok?'✓ Enviada':'✗ Error'}</span>
-                  ) : (
-                    <div style={{ display:'flex', gap:5, flexShrink:0 }}>
-                      <button onClick={handleSendImage} disabled={imgUploading||!windowOpen} style={{ padding:'5px 10px', background:imgUploading?'#111c2a':'linear-gradient(135deg,#25d366,#128c7e)', border:'none', borderRadius:7, color:'#fff', fontSize:11, fontWeight:700, cursor:imgUploading?'default':'pointer', fontFamily:'inherit' }}>{imgUploading?'⏳':'📤 Enviar'}</button>
-                      <button onClick={cancelImage} style={{ padding:'5px 8px', background:'transparent', border:'1px solid #1e2d3d', borderRadius:7, color:'#475569', fontSize:11, cursor:'pointer', fontFamily:'inherit' }}>✕</button>
-                    </div>
-                  )}
+                  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+                    <span style={{ fontSize:10, color:'#64748b' }}>
+                      {imgUploading
+                        ? `Enviando ${imgProgress}/${imgFiles.length}...`
+                        : imgResult
+                          ? imgResult.ok ? `✓ ${imgFiles.length} enviada${imgFiles.length>1?'s':''}` : '✗ Error al enviar'
+                          : `${imgFiles.length} foto${imgFiles.length>1?'s':''} seleccionada${imgFiles.length>1?'s':''}`
+                      }
+                    </span>
+                    {!imgResult && (
+                      <div style={{ display:'flex', gap:5 }}>
+                        <button onClick={handleSendImage} disabled={imgUploading||!windowOpen}
+                          style={{ padding:'5px 10px', background:imgUploading?'#111c2a':'linear-gradient(135deg,#25d366,#128c7e)', border:'none', borderRadius:7, color:'#fff', fontSize:11, fontWeight:700, cursor:imgUploading?'default':'pointer', fontFamily:'inherit' }}>
+                          {imgUploading?'⏳':'📤 Enviar'}
+                        </button>
+                        <button onClick={cancelImage} style={{ padding:'5px 8px', background:'transparent', border:'1px solid #1e2d3d', borderRadius:7, color:'#475569', fontSize:11, cursor:'pointer', fontFamily:'inherit' }}>✕</button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
               <div style={{ display:'flex', gap:8, alignItems:'flex-end' }}>
-                <button onClick={() => fileRef.current?.click()} style={{ width:42, height:42, flexShrink:0, background:imgPreview?'rgba(37,211,102,.12)':'#111c2a', border:`1px solid ${imgPreview?'rgba(37,211,102,.3)':'#1e2d3d'}`, borderRadius:11, cursor:'pointer', fontSize:17, display:'flex', alignItems:'center', justifyContent:'center', color:imgPreview?'#25d366':'#475569', transition:'all .15s' }} title="Adjuntar imagen">📎</button>
+                <button onClick={() => fileRef.current?.click()} style={{ width:42, height:42, flexShrink:0, background:imgFiles.length?'rgba(37,211,102,.12)':'#111c2a', border:`1px solid ${imgFiles.length?'rgba(37,211,102,.3)':'#1e2d3d'}`, borderRadius:11, cursor:'pointer', fontSize:17, display:'flex', alignItems:'center', justifyContent:'center', color:imgFiles.length?'#25d366':'#475569', transition:'all .15s', position:'relative' }} title="Adjuntar imagen">
+                  📎
+                  {imgFiles.length > 0 && <span style={{ position:'absolute', top:-4, right:-4, width:16, height:16, borderRadius:'50%', background:'#25d366', color:'#080d14', fontSize:8, fontWeight:900, display:'flex', alignItems:'center', justifyContent:'center' }}>{imgFiles.length}</span>}
+                </button>
                 <button onClick={() => setShowBtnPanel(p=>!p)} title="Botones interactivos" style={{ width:42, height:42, flexShrink:0, background:showBtnPanel?'rgba(37,211,102,.15)':'#111c2a', border:`1px solid ${showBtnPanel?'rgba(37,211,102,.4)':'#1e2d3d'}`, borderRadius:11, cursor:'pointer', fontSize:16, display:'flex', alignItems:'center', justifyContent:'center', color:showBtnPanel?'#25d366':'#475569', transition:'all .15s' }}>🔘</button>
                 <button onClick={() => { setShowEmoji(p=>!p); setShowBtnPanel(false) }} title="Emojis" style={{ width:42, height:42, flexShrink:0, background:showEmoji?'rgba(245,158,11,.15)':'#111c2a', border:`1px solid ${showEmoji?'rgba(245,158,11,.4)':'#1e2d3d'}`, borderRadius:11, cursor:'pointer', fontSize:20, display:'flex', alignItems:'center', justifyContent:'center', transition:'all .15s' }}>😊</button>
-                <input ref={fileRef} type="file" accept="image/*,video/mp4,video/3gpp,video/quicktime" style={{ display:'none' }} onChange={handleFileSelect} />
+                <input ref={fileRef} type="file" accept="image/*,video/mp4,video/3gpp,video/quicktime" multiple style={{ display:'none' }} onChange={handleFileSelect} />
 
                 {/* Panel de emojis */}
                 {showEmoji && (
