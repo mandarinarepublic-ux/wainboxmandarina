@@ -182,16 +182,24 @@ function MediaContent({ tipo, mediaUrl }) {
     </a>
   )
 
-  if (url && isAudio) return (
-    <a href={url} target="_blank" rel="noreferrer" style={{
-      display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6,
-      background: 'rgba(37,211,102,.08)', border: '1px solid rgba(37,211,102,.15)',
-      borderRadius: 10, padding: '10px 14px', textDecoration: 'none',
-    }}>
-      <span style={{ fontSize: 22 }}>🎵</span>
-      <span style={{ fontSize: 13, color: '#25d366', fontWeight: 600 }}>Escuchar audio</span>
-    </a>
-  )
+  if (url && isAudio) {
+    const isDrive = url.includes('drive.google.com')
+    if (isDrive) return (
+      <a href={url} target="_blank" rel="noreferrer" style={{
+        display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6,
+        background: 'rgba(37,211,102,.08)', border: '1px solid rgba(37,211,102,.15)',
+        borderRadius: 10, padding: '10px 14px', textDecoration: 'none',
+      }}>
+        <span style={{ fontSize: 22 }}>🎵</span>
+        <span style={{ fontSize: 13, color: '#25d366', fontWeight: 600 }}>Escuchar audio</span>
+      </a>
+    )
+    return (
+      <div style={{ marginBottom: 6, minWidth: 280 }}>
+        <audio controls src={url} style={{ width: '100%', minWidth: 280, height: 40, display: 'block', borderRadius: 10, outline: 'none', accentColor: '#25d366' }} />
+      </div>
+    )
+  }
 
   if (url && isVideo) return (
     <a href={url} target="_blank" rel="noreferrer" style={{
@@ -310,7 +318,7 @@ export function MessageBubble({ msg, allMsgs }) {
         {hasText && (
           <p style={{
             margin: 0, fontSize: 14, color: '#e2e8f0',
-            lineHeight: 1.55, wordBreak: 'break-word',
+            lineHeight: 1.55, wordBreak: 'break-word', whiteSpace: 'pre-wrap',
           }}>{msg.mensaje}</p>
         )}
 
