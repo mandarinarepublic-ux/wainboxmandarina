@@ -278,10 +278,7 @@ export default function App() {
   const handleSend = async (text) => {
     const t = (text || input).trim()
     if (!t || !activeConv || sending) return
-    setInput('')
-    setSending(true)
-    setToast(null)
-    autoScroll.current = true
+    setInput(''); setSending(true); setToast(null); autoScroll.current = true
     const tmpMsg = {
       id: 'tmp_' + Date.now(), telefono: activeConv.telefono,
       nombre: activeConv.nombre, mensaje: t,
@@ -290,10 +287,13 @@ export default function App() {
     setConvs(prev => prev.map(c =>
       c.telefono === activeConv.telefono ? { ...c, msgs: [...c.msgs, tmpMsg], last: tmpMsg } : c
     ))
-    await changeStatus(activeConv.telefono, currentStatus === 'ventaproceso' ? 'ventaproceso' : 'atendido')
-    const result = await sendReply(activeConv.telefono, activeConv.nombre, t)
-    setSending(false)
-    setToast(result)
+    // Dar tiempo a React para renderizar el tmpMsg antes de hacer el fetch
+    await new Promise(r => setTimeout(r, 0))
+    const [result] = await Promise.all([
+      sendReply(activeConv.telefono, activeConv.nombre, t),
+      changeStatus(activeConv.telefono, currentStatus === 'ventaproceso' ? 'ventaproceso' : 'atendido'),
+    ])
+    setSending(false); setToast(result)
     setTimeout(() => setToast(null), 4000)
     setTimeout(load, 4000)
   }
