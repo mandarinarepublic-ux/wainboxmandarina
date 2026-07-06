@@ -233,6 +233,7 @@ export default function App() {
     archivado:     searched.filter(c => getStatus(c.telefono) === 'archivado').length,
     ventaproceso:  searched.filter(c => getStatus(c.telefono) === 'ventaproceso').length,
     venta:         searched.filter(c => getStatus(c.telefono) === 'venta').length,
+    soporte:       searched.filter(c => getStatus(c.telefono) === 'soporte').length,
   }
 
   const lastMsg      = activeConv?.last
@@ -547,6 +548,7 @@ export default function App() {
                 { key:'atendido',     label:'🟢 Atendidos',     color:'#4ade80' },
                 { key:'ventaproceso', label:'🟡 En proceso',    color:'#f59e0b' },
                 { key:'venta',        label:'💰 Ventas',        color:'#10b981' },
+                { key:'soporte',      label:'🎧 Soporte',       color:'#a78bfa' },
                 { key:'archivado',    label:'⚫ Archivados',    color:'#64748b' },
               ].map(({ key, label, color }) => (
                 <button key={key} onClick={() => setFilter(key)} style={{
@@ -569,7 +571,7 @@ export default function App() {
                 <Spinner size={24} /><span style={{ fontSize:11, color:'#2a3f55' }}>Cargando...</span>
               </div>
             ) : filtered.length === 0 ? (
-              <div style={{ padding:28, textAlign:'center', color:'#2a3f55', fontSize:12 }}>Sin conversaciones {({pendiente:'pendientes',atendido:'atendidas',ventaproceso:'en proceso',venta:'con venta',archivado:'archivadas'})[filter]||''}</div>
+              <div style={{ padding:28, textAlign:'center', color:'#2a3f55', fontSize:12 }}>Sin conversaciones {({pendiente:'pendientes',atendido:'atendidas',ventaproceso:'en proceso',venta:'con venta',soporte:'en soporte',archivado:'archivadas'})[filter]||''}</div>
             ) : filtered.map(conv => (
               <ContactRow
                 key={conv.telefono}
@@ -613,6 +615,7 @@ export default function App() {
                   { s:'ventaproceso', icon:'🟡', label:'En proceso', shortLabel:'🟡', activeColor:'#f59e0b' },
                   { s:'venta',        icon:'💰', label:'Venta',      shortLabel:'💰', activeColor:'#10b981' },
                   { s:'atendido',     icon:'🟢', label:'Atendido',   shortLabel:'🟢', activeColor:'#4ade80' },
+                  { s:'soporte',      icon:'🎧', label:'Soporte',    shortLabel:'🎧', activeColor:'#a78bfa' },
                   { s:'archivado',    icon:'⚫', label:'Archivar',   shortLabel:'⚫', activeColor:'#94a3b8' },
                 ].map(({ s, icon, label, shortLabel, activeColor }) => (
                   <button key={s} onClick={() => changeStatus(activeConv.telefono, s)} title={label} style={{
