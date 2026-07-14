@@ -36,6 +36,26 @@ export function fmtDate(iso) {
   })
 }
 
+// ── WAMID HASH (normaliza IDs de mensaje de WhatsApp) ────────────
+/**
+ * Meta codifica el MISMO mensaje con distinto "sobre" según el contexto:
+ *  - id del mensaje (col A):  wamid.HBgM<telefono>...<HASH>
+ *  - context.id de una cita:  wamid.HBgT<EC.dbid>...<HASH>
+ * El HASH de contenido (hex, al final) es idéntico en ambos, así que
+ * cruzamos por él en vez del string completo. Devuelve '' si no se puede.
+ */
+export function wamidHash(wamid) {
+  if (!wamid || typeof wamid !== 'string') return ''
+  let b64 = wamid.replace(/^wamid\./, '').replace(/-/g, '+').replace(/_/g, '/')
+  while (b64.length % 4) b64 += '='
+  let bin
+  try { bin = atob(b64) } catch { return '' }
+  // El hash de contenido es la ÚLTIMA corrida hex larga (≥14).
+  // Umbral 14 para no confundir con el teléfono (12 díg.) ni el id EC (16 díg. va antes).
+  const runs = bin.match(/[0-9A-F]{14,}/g)
+  return runs ? runs[runs.length - 1] : ''
+}
+
 // ── BUILD CONVERSATIONS FROM FLAT ROWS ───────────────────────────
 /**
  * Agrupa filas del Sheet en conversaciones por número de teléfono.

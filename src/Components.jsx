@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { colorFor, initialsFor, fmtTime } from './utils.js'
+import { colorFor, initialsFor, fmtTime, wamidHash } from './utils.js'
 
 // ── SPINNER ──────────────────────────────────────────────────────
 export function Spinner({ size = 24 }) {
@@ -238,12 +238,34 @@ function MediaContent({ tipo, mediaUrl }) {
 }
 
 // ── QUOTED MESSAGE (cita) ────────────────────────────────────────
-function QuotedMessage({ contextoId, allMsgs }) {
-  if (!contextoId || !allMsgs) return null
-  // Solo procesar IDs válidos de WhatsApp
-  if (!contextoId.startsWith('wamid.')) return null
-  const cited = allMsgs.find(m => m.id === contextoId)
-  if (!cited) return null
+function QuotedMessage({ contextoId, allMsgs, citedIndex, selfId }) {
+  if (!contextoId || !String(contextoId).startsWith('wamid.')) return null
+
+  // Meta codifica el mismo mensaje con distinto "sobre" en el id vs. el
+  // context.id, pero el hash de contenido coincide → cruzamos por hash.
+  const key = wamidHash(contextoId)
+  let cited = null
+  if (key) {
+    cited = citedIndex?.get(key)
+      || (allMsgs && allMsgs.find(m => wamidHash(m.id) === key))
+      || null
+  }
+  // Nunca citarse a sí mismo (artefacto de datos: context.id == id propio).
+  if (cited && cited.id === selfId) cited = null
+
+  // Fallback: es una respuesta, pero el mensaje citado no está guardado
+  // (p.ej. envíos sin wamid válido en la hoja). Al menos avisamos que citó.
+  if (!cited) return (
+    <div style={{
+      borderLeft: '3px solid rgba(148,163,184,.4)',
+      background: 'rgba(0,0,0,.2)',
+      borderRadius: '0 8px 8px 0',
+      padding: '5px 10px', marginBottom: 6,
+      fontSize: 12, color: '#64748b', fontStyle: 'italic',
+    }}>
+      ↩️ Respondió a un mensaje anterior
+    </div>
+  )
 
   const isImage = ['image','sticker'].includes(cited.tipo) || !!cited.mediaUrl?.match(/\.(jpg|jpeg|png|webp|gif)(\?|$)/i)
 
@@ -288,7 +310,7 @@ function QuotedMessage({ contextoId, allMsgs }) {
 }
 
 // ── MESSAGE BUBBLE ───────────────────────────────────────────────
-export function MessageBubble({ msg, allMsgs }) {
+export function MessageBubble({ msg, allMsgs, citedIndex }) {
   const isMe     = msg.direccion === 'SALIENTE'
   const hasMedia = !!msg.mediaUrl
   const hasText  = !!msg.mensaje
@@ -308,7 +330,7 @@ export function MessageBubble({ msg, allMsgs }) {
       }}>
 
         {msg.contextoId && (
-          <QuotedMessage contextoId={msg.contextoId} allMsgs={allMsgs} />
+          <QuotedMessage contextoId={msg.contextoId} allMsgs={allMsgs} citedIndex={citedIndex} selfId={msg.id} />
         )}
 
         {hasMedia && (

@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { fetchRows, fetchContacts, sendReply, updateContact, isDemo, sendInteractiveButtons, toggleIAMode, sendVideo } from './api.js'
-import { buildConvs, fmtDate } from './utils.js'
+import { buildConvs, fmtDate, wamidHash } from './utils.js'
 import { Spinner, Avatar, ContactRow, MessageBubble, Toast } from './Components.jsx'
 import RightPanel from './RightPanel.jsx'
 import SetupModal from './SetupModal.jsx'
@@ -214,6 +214,16 @@ export default function App() {
 
   // ── Derived state ─────────────────────────────────────────────
   const activeConv  = convs.find(c => c.telefono === active) || null
+  // Índice hash-de-mensaje → mensaje, para resolver citas (context.id) en O(1).
+  // Se recalcula solo al cambiar de conversación o llegar mensajes nuevos.
+  const citedIndex  = useMemo(() => {
+    const map = new Map()
+    ;(activeConv?.msgs || []).forEach(m => {
+      const h = wamidHash(m.id)
+      if (h && !map.has(h)) map.set(h, m)
+    })
+    return map
+  }, [activeConv])
   const totalUnread = convs.reduce((s, c) => s + c.unread, 0)
   const demo        = isDemo()
 
@@ -674,7 +684,7 @@ export default function App() {
                         <span style={{ background:'rgba(255,255,255,.04)', borderRadius:20, padding:'3px 14px', fontSize:11, color:'#475569' }}>{fmtDate(msg.timestamp)}</span>
                       </div>
                     )}
-                    <MessageBubble msg={msg} allMsgs={activeConv.msgs} />
+                    <MessageBubble msg={msg} allMsgs={activeConv.msgs} citedIndex={citedIndex} />
                   </div>
                 )
               })}
